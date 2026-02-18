@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-create-skills-table
+      author: recruforce2
+      comment: "Creates the skills table — platform skill repository used by job offers and candidates"
+      changes:
+        - createTable:
+            tableName: skills
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: required_level
+                  type: VARCHAR(20)
+
+        - createIndex:
+            indexName: idx_skills_name
+            tableName: skills
+            columns:
+              - column:
+                  name: name
+
+        - createIndex:
+            indexName: idx_skills_type
+            tableName: skills
+            columns:
+              - column:
+                  name: type
