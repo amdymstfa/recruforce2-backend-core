@@ -1,0 +1,58 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-add-indexes
+      author: recruforce2
+      comment: "Adds performance indexes on frequently queried columns across core tables"
+      changes:
+
+        # Users — role filtering
+        - createIndex:
+            indexName: idx_users_role
+            tableName: users
+            columns:
+              - column:
+                  name: role
+
+        # Users — active status filtering
+        - createIndex:
+            indexName: idx_users_is_active
+            tableName: users
+            columns:
+              - column:
+                  name: is_active
+
+        # Job offers — combined status + expiration for dashboard queries
+        - createIndex:
+            indexName: idx_job_offers_status_expiration
+            tableName: job_offers
+            columns:
+              - column:
+                  name: status
+              - column:
+                  name: expiration_date
+
+        # Applications — combined candidate + status for profile view
+        - createIndex:
+            indexName: idx_applications_candidate_status
+            tableName: applications
+            columns:
+              - column:
+                  name: candidate_id
+              - column:
+                  name: status
+
+        # Applications — matching score for ranking queries
+        - createIndex:
+            indexName: idx_applications_matching_score
+            tableName: applications
+            columns:
+              - column:
+                  name: matching_score
+
+        # Candidates — name search
+        - createIndex:
+            indexName: idx_candidates_last_name
+            tableName: candidates
+            columns:
+              - column:
+                  name: last_name
