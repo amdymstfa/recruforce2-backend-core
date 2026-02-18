@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-create-notification-preferences-table
+      author: recruforce2
+      comment: "Creates the notification_preferences table — one record per user"
+      changes:
+        - createTable:
+            tableName: notification_preferences
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    unique: true
+                    foreignKeyName: fk_notif_prefs_user
+                    references: users(id)
+              - column:
+                  name: email_new_candidate
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email_interview
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email_deadline
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+              - column:
+                  name: in_app_notifications
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            indexName: idx_notif_prefs_user_id
+            tableName: notification_preferences
+            unique: true
+            columns:
+              - column:
+                  name: user_id
