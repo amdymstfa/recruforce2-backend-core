@@ -1,0 +1,86 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-create-applications-table
+      author: recruforce2
+      comment: "Creates the applications table — tracks candidate applications with AI matching score"
+      changes:
+        - createTable:
+            tableName: applications
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: candidate_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_applications_candidate
+                    references: candidates(id)
+              - column:
+                  name: job_offer_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_applications_job_offer
+                    references: job_offers(id)
+              - column:
+                  name: received_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  defaultValue: RECEIVED
+                  constraints:
+                    nullable: false
+              - column:
+                  name: matching_score
+                  type: INTEGER
+              - column:
+                  name: is_qualified
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: cv_file_path
+                  type: VARCHAR(500)
+              - column:
+                  name: cover_letter
+                  type: TEXT
+              - column:
+                  name: source_channel
+                  type: VARCHAR(50)
+
+        - createIndex:
+            indexName: idx_applications_candidate_id
+            tableName: applications
+            columns:
+              - column:
+                  name: candidate_id
+
+        - createIndex:
+            indexName: idx_applications_job_offer_id
+            tableName: applications
+            columns:
+              - column:
+                  name: job_offer_id
+
+        - createIndex:
+            indexName: idx_applications_status
+            tableName: applications
+            columns:
+              - column:
+                  name: status
+
+        - createIndex:
+            indexName: idx_applications_created_at
+            tableName: applications
+            columns:
+              - column:
+                  name: received_at
