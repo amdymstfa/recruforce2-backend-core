@@ -1,0 +1,120 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-create-recruiter-availability-table
+      author: recruforce2
+      comment: "Creates audit_logs and gdpr_consents tables for traceability and GDPR compliance"
+      changes:
+
+        # -------------------------------------------------------
+        # Audit logs table — immutable action trail
+        # -------------------------------------------------------
+        - createTable:
+            tableName: audit_logs
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_audit_logs_user
+                    references: users(id)
+              - column:
+                  name: action
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: entity_type
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: entity_id
+                  type: BIGINT
+              - column:
+                  name: details
+                  type: TEXT
+              - column:
+                  name: ip_address
+                  type: VARCHAR(45)
+              - column:
+                  name: timestamp
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            indexName: idx_audit_user_id
+            tableName: audit_logs
+            columns:
+              - column:
+                  name: user_id
+
+        - createIndex:
+            indexName: idx_audit_entity
+            tableName: audit_logs
+            columns:
+              - column:
+                  name: entity_type
+              - column:
+                  name: entity_id
+
+        - createIndex:
+            indexName: idx_audit_timestamp
+            tableName: audit_logs
+            columns:
+              - column:
+                  name: timestamp
+
+        # -------------------------------------------------------
+        # GDPR consents table — one record per candidate
+        # -------------------------------------------------------
+        - createTable:
+            tableName: gdpr_consents
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: candidate_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    unique: true
+                    foreignKeyName: fk_gdpr_consents_candidate
+                    references: candidates(id)
+              - column:
+                  name: consent_processing
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: consent_storage
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: consent_date
+                  type: TIMESTAMP
+              - column:
+                  name: ip_address
+                  type: VARCHAR(45)
+
+        - createIndex:
+            indexName: idx_gdpr_consent_candidate_id
+            tableName: gdpr_consents
+            unique: true
+            columns:
+              - column:
+                  name: candidate_id
