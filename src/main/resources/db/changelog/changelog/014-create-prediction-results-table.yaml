@@ -1,0 +1,215 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014-create-prediction-results-table
+      author: recruforce2
+      comment: "Creates ml_models, model_metrics, and predictions tables for the AI prediction module"
+      changes:
+
+        # -------------------------------------------------------
+        # ML models table — trained model registry
+        # -------------------------------------------------------
+        - createTable:
+            tableName: ml_models
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: version
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: algorithm
+                  type: VARCHAR(100)
+              - column:
+                  name: training_date
+                  type: TIMESTAMP
+              - column:
+                  name: accuracy
+                  type: DOUBLE PRECISION
+              - column:
+                  name: precision
+                  type: DOUBLE PRECISION
+              - column:
+                  name: recall
+                  type: DOUBLE PRECISION
+              - column:
+                  name: f1_score
+                  type: DOUBLE PRECISION
+              - column:
+                  name: predictions_count
+                  type: INTEGER
+                  defaultValueNumeric: 0
+              - column:
+                  name: success_rate
+                  type: DOUBLE PRECISION
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
+              - column:
+                  name: statistics
+                  type: TEXT
+
+        - createIndex:
+            indexName: idx_ml_models_is_active
+            tableName: ml_models
+            columns:
+              - column:
+                  name: is_active
+
+        - createIndex:
+            indexName: idx_ml_models_name
+            tableName: ml_models
+            columns:
+              - column:
+                  name: name
+
+        # -------------------------------------------------------
+        # Model metrics table — time-series performance tracking
+        # -------------------------------------------------------
+        - createTable:
+            tableName: model_metrics
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: model_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_model_metrics_model
+                    references: ml_models(id)
+              - column:
+                  name: metric_name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: DOUBLE PRECISION
+                  constraints:
+                    nullable: false
+              - column:
+                  name: predictions_count
+                  type: INTEGER
+              - column:
+                  name: recorded_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: statistics
+                  type: TEXT
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            indexName: idx_model_metrics_model_id
+            tableName: model_metrics
+            columns:
+              - column:
+                  name: model_id
+
+        - createIndex:
+            indexName: idx_model_metrics_recorded_at
+            tableName: model_metrics
+            columns:
+              - column:
+                  name: recorded_at
+
+        # -------------------------------------------------------
+        # Predictions table — AI prediction results per candidate/offer pair
+        # -------------------------------------------------------
+        - createTable:
+            tableName: predictions
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: candidate_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_predictions_candidate
+                    references: candidates(id)
+              - column:
+                  name: job_offer_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_predictions_job_offer
+                    references: job_offers(id)
+              - column:
+                  name: matching_score
+                  type: DOUBLE PRECISION
+              - column:
+                  name: success_probability
+                  type: DOUBLE PRECISION
+              - column:
+                  name: confidence
+                  type: DOUBLE PRECISION
+              - column:
+                  name: main_factors
+                  type: TEXT
+              - column:
+                  name: recommendation
+                  type: TEXT
+              - column:
+                  name: calculated_at
+                  type: TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: model_version
+                  type: VARCHAR(20)
+              - column:
+                  name: ml_model_id
+                  type: BIGINT
+                  constraints:
+                    foreignKeyName: fk_predictions_ml_model
+                    references: ml_models(id)
+
+        - createIndex:
+            indexName: idx_predictions_candidate_id
+            tableName: predictions
+            columns:
+              - column:
+                  name: candidate_id
+
+        - createIndex:
+            indexName: idx_predictions_job_offer_id
+            tableName: predictions
+            columns:
+              - column:
+                  name: job_offer_id
+
+        - createIndex:
+            indexName: idx_predictions_created_at
+            tableName: predictions
+            columns:
+              - column:
+                  name: calculated_at
