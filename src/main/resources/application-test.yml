@@ -1,0 +1,80 @@
+# ===================================================
+# RecruForce2 - Test Profile
+# Active during unit and integration tests
+# ===================================================
+
+spring:
+  # ===================================================
+  # H2 in-memory database for PostgreSQL tests
+  # ===================================================
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  # ===================================================
+  # JPA / Hibernate
+  # ===================================================
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.H2Dialect
+
+  # ===================================================
+  # Embedded MongoDB for tests
+  # ===================================================
+  data:
+    mongodb:
+      # Flapdoodle embedded MongoDB will auto-configure
+      database: testdb
+
+  # ===================================================
+  # Liquibase (disabled in tests — using ddl-auto)
+  # ===================================================
+  liquibase:
+    enabled: false
+
+  # ===================================================
+  # Email (disabled in tests)
+  # ===================================================
+  mail:
+    host: localhost
+    port: 3025
+
+# ===================================================
+# Server configuration
+# ===================================================
+server:
+  port: 0 # Random port
+
+# ===================================================
+# Logging
+# ===================================================
+logging:
+  level:
+    root: WARN
+    com.backend_core.recruforce2: INFO
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.mongodb.driver: WARN
+
+# ===================================================
+# JWT (test keys)
+# ===================================================
+jwt:
+  secret: test-secret-key-for-testing-purposes-only-minimum-256-bits
+  expiration: 3600000
+  refresh-expiration: 7200000
+
+# ===================================================
+# AI Microservice (mocked)
+# ===================================================
+ai:
+  service:
+    url: http://localhost:9999
+    timeout: 5000
