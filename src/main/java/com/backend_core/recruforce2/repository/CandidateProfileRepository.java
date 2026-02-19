@@ -13,7 +13,7 @@ import java.util.Optional;
 /**
  * JPA repository for {@link Candidate} entity.
  * Provides access to the {@code candidates} table in PostgreSQL.
- * Note: parsed CV content is stored in MongoDB.
+ * Note: parsed CV content is stored in MongoDB — use {@link ParsedCvMongoRepository} for that.
  */
 @Repository
 public interface CandidateProfileRepository extends JpaRepository<Candidate, Long> {
