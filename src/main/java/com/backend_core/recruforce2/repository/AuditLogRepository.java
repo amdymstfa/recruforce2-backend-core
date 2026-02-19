@@ -17,7 +17,7 @@ import java.util.List;
  * All records are immutable — no update or delete operations.
  */
 @Repository
-public interface RecruiterAvailabilityRepository extends JpaRepository<AuditLog, Long> {
+public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
 
   /** Finds all audit logs for a specific user (paginated, most recent first) */
   Page<AuditLog> findByUserIdOrderByTimestampDesc(Long userId, Pageable pageable);
