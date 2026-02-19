@@ -31,9 +31,7 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
   List<Skill> searchByName(@Param("keyword") String keyword);
 
   /** Finds all skills associated with a specific job offer */
-  @Query("SELECT s FROM Skill s " +
-    "JOIN s.jobOffers j " +
-    "WHERE j.id = :jobOfferId")
+  @Query("SELECT j.requiredSkills FROM JobOffer j WHERE j.id = :jobOfferId")
   List<Skill> findByJobOfferId(@Param("jobOfferId") Long jobOfferId);
 
   /** Finds skills by type ordered by name */
