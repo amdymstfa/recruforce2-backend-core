@@ -68,7 +68,7 @@ logging:
 # ===================================================
 jwt:
   secret: test-secret-key-for-testing-purposes-only-minimum-256-bits
-  expiration: 3600000
+  expiration: 3600000 
   refresh-expiration: 7200000
 
 # ===================================================
