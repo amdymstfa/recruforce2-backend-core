@@ -37,8 +37,8 @@ public class ModelMetric {
   private String metricName;
 
   /** Metric value at the time of recording */
-  @Column(nullable = false)
-  private Double value;
+  @Column(name = "metric_value", nullable = false)
+  private Double metricValue;
 
   /** Number of predictions made when this metric was recorded */
   @Column(name = "predictions_count")
