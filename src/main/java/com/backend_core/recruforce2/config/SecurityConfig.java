@@ -1,8 +1,8 @@
 package com.backend_core.recruforce2.config;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -31,11 +31,18 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthFilter;
   private final UserDetailsService userDetailsService;
+
+  public SecurityConfig(
+    @Lazy JwtAuthenticationFilter jwtAuthFilter,
+    @Lazy UserDetailsService userDetailsService
+  ) {
+    this.jwtAuthFilter = jwtAuthFilter;
+    this.userDetailsService = userDetailsService;
+  }
 
   /**
    * Configures the security filter chain.
