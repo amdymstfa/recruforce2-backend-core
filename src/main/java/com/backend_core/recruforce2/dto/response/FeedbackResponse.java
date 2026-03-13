@@ -28,19 +28,4 @@ public class FeedbackResponse {
   private List<CriterionEvaluationResponse> criteriaEvaluations;
 
   private LocalDateTime createdAt;
-
-  /**
-   * Nested DTO for criterion evaluation details.
-   */
-  @Getter
-  @Setter
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Builder
-  public static class CriterionEvaluationResponse {
-    private Long id;
-    private String criterionName;
-    private Integer score;
-    private String comment;
-  }
 }
