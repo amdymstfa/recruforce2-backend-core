@@ -112,10 +112,8 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <scope>test</scope>
+      <version>2.2.224</version>
     </dependency>
-
-
     <!-- ===================================================== -->
     <!-- MESSAGING & TEMPLATES                                   -->
     <!-- ===================================================== -->
@@ -203,12 +201,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- H2 in-memory database for unit tests -->
-    <dependency>
-      <groupId>com.h2database</groupId>
-      <artifactId>h2</artifactId>
-      <scope>test</scope>
-    </dependency>
+
 
     <!-- Flapdoodle — embedded MongoDB for integration tests -->
     <dependency>
