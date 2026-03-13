@@ -5,27 +5,26 @@ import com.backend_core.recruforce2.domain.entities.NotificationPreferences;
 import com.backend_core.recruforce2.dto.request.LoginRequest;
 import com.backend_core.recruforce2.dto.request.RegisterRequest;
 import com.backend_core.recruforce2.dto.response.AuthResponse;
-import com.backend_core.recruforce2.dto.response.UserResponse;
 import com.backend_core.recruforce2.mapper.UserMapper;
 import com.backend_core.recruforce2.repository.UserRepository;
 import com.backend_core.recruforce2.repository.NotificationPreferencesRepository;
 import com.backend_core.recruforce2.util.JwtTokenProvider;
-import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 /**
  * Service handling authentication operations and implementing Spring Security's UserDetailsService.
- * <p>
+ *
  * Responsibilities:
  * - User registration
  * - User login (JWT generation)
@@ -33,7 +32,6 @@ import java.time.LocalDateTime;
  * - Loading user details for Spring Security
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class AuthService implements UserDetailsService {
 
@@ -41,8 +39,24 @@ public class AuthService implements UserDetailsService {
   private final NotificationPreferencesRepository notificationPreferencesRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtTokenProvider jwtTokenProvider;
-  private final AuthenticationManager authenticationManager;
+  private final AuthenticationConfiguration authenticationConfiguration;
   private final UserMapper userMapper;
+
+  public AuthService(
+    UserRepository userRepository,
+    NotificationPreferencesRepository notificationPreferencesRepository,
+    PasswordEncoder passwordEncoder,
+    JwtTokenProvider jwtTokenProvider,
+    AuthenticationConfiguration authenticationConfiguration,
+    UserMapper userMapper
+  ) {
+    this.userRepository = userRepository;
+    this.notificationPreferencesRepository = notificationPreferencesRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.jwtTokenProvider = jwtTokenProvider;
+    this.authenticationConfiguration = authenticationConfiguration;
+    this.userMapper = userMapper;
+  }
 
   @Transactional
   public AuthResponse register(RegisterRequest request) {
@@ -52,14 +66,12 @@ public class AuthService implements UserDetailsService {
       throw new IllegalArgumentException("Email already registered");
     }
 
-    // Use mapper to convert DTO → Entity
     User user = userMapper.toEntity(request);
     user.setPassword(passwordEncoder.encode(request.getPassword()));
 
     user = userRepository.save(user);
     log.info("User registered successfully with ID: {}", user.getId());
 
-    // Create default notification preferences
     NotificationPreferences preferences = NotificationPreferences.builder()
       .user(user)
       .emailNewCandidate(true)
@@ -67,13 +79,12 @@ public class AuthService implements UserDetailsService {
       .emailDeadline(true)
       .inAppNotifications(true)
       .build();
+
     notificationPreferencesRepository.save(preferences);
 
-    // Generate tokens
     String accessToken = jwtTokenProvider.generateToken(user);
     String refreshToken = jwtTokenProvider.generateRefreshToken(user);
 
-    // Use mapper to convert Entity → DTO
     return AuthResponse.of(accessToken, refreshToken, userMapper.toResponse(user));
   }
 
@@ -81,12 +92,18 @@ public class AuthService implements UserDetailsService {
   public AuthResponse login(LoginRequest request) {
     log.info("Login attempt for email: {}", request.getEmail());
 
-    authenticationManager.authenticate(
-      new UsernamePasswordAuthenticationToken(
-        request.getEmail(),
-        request.getPassword()
-      )
-    );
+    try {
+      authenticationConfiguration
+        .getAuthenticationManager()
+        .authenticate(
+          new UsernamePasswordAuthenticationToken(
+            request.getEmail(),
+            request.getPassword()
+          )
+        );
+    } catch (Exception e) {
+      throw new RuntimeException("Authentication failed", e);
+    }
 
     User user = userRepository.findByEmail(request.getEmail())
       .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -100,7 +117,6 @@ public class AuthService implements UserDetailsService {
 
     log.info("User logged in successfully: {}", user.getEmail());
 
-    // Use mapper instead of manual mapping
     return AuthResponse.of(accessToken, refreshToken, userMapper.toResponse(user));
   }
 
@@ -122,15 +138,16 @@ public class AuthService implements UserDetailsService {
 
     log.info("Tokens refreshed successfully for user: {}", user.getEmail());
 
-    // Use mapper
     return AuthResponse.of(newAccessToken, newRefreshToken, userMapper.toResponse(user));
   }
 
   @Override
   @Transactional(readOnly = true)
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
     return userRepository.findByEmail(username)
-      .orElseThrow(() -> new UsernameNotFoundException(
-        "User not found with email: " + username));
+      .orElseThrow(() ->
+        new UsernameNotFoundException("User not found with email: " + username)
+      );
   }
 }
