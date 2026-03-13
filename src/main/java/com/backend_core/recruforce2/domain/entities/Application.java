@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
   @Index(name = "idx_applications_candidate_id", columnList = "candidate_id"),
   @Index(name = "idx_applications_job_offer_id", columnList = "job_offer_id"),
   @Index(name = "idx_applications_status", columnList = "status"),
-  @Index(name = "idx_applications_created_at", columnList = "created_at")
+  @Index(name = "idx_applications_received_at", columnList = "received_at")
 })
 @Getter
 @Setter
@@ -38,6 +38,7 @@ public class Application {
   @JoinColumn(name = "job_offer_id", nullable = false)
   private JobOffer jobOffer;
 
+  /** Date when the application was received */
   @Column(name = "received_at", nullable = false, updatable = false)
   private LocalDateTime receivedAt;
 
@@ -95,7 +96,7 @@ public class Application {
     this.isQualified = score != null && score >= threshold;
   }
 
-  /** Calculates the score — delegates to AI service (called externally) */
+  /** Returns the calculated score */
   public Integer calculateScore() {
     return this.matchingScore;
   }
