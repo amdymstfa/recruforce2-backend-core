@@ -17,6 +17,6 @@ public interface FeedbackMapper {
   @Mapping(target = "interviewId", source = "interview.id")
   @Mapping(target = "evaluatorId", source = "evaluator.id")
   @Mapping(target = "evaluatorName", expression = "java(feedback.getEvaluator().getFullName())")
-  @Mapping(target = "criteriaEvaluations", source = "evaluationCriteria")
+  @Mapping(target = "criteriaEvaluations", source = "criteriaEvaluations")
   FeedbackResponse toResponse(Feedback feedback);
 }
