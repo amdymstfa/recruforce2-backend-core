@@ -2,7 +2,6 @@ package com.backend_core.recruforce2.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,13 +22,13 @@ import java.util.function.Function;
 public class JwtTokenProvider {
 
   @Value("${jwt.secret}")
-  private String secret ;
+  private String secret;
 
   @Value("${jwt.expiration}")
-  private Long expiration ;
+  private Long expiration;
 
-  @Value("${jwt.refresh-Expiration}")
-  private Long refreshExpiration ;
+  @Value("${jwt.refresh-expiration}")
+  private long refreshExpiration;
 
   /**
    * Generate a JWT access token for a user
@@ -68,11 +67,11 @@ public class JwtTokenProvider {
     Date expiryDate = new Date(now.getTime() + expiration);
 
     return Jwts.builder()
-      .setClaims(claims)
-      .setSubject(subject)
-      .setIssuedAt(now)
-      .setExpiration(expiryDate)
-      .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+      .claims(claims)
+      .subject(subject)
+      .issuedAt(now)
+      .expiration(expiryDate)
+      .signWith(getSigningKey())
       .compact();
   }
 
@@ -112,11 +111,11 @@ public class JwtTokenProvider {
    * @return all claims
    */
   private Claims extractAllClaims(String token) {
-    return Jwts.parserBuilder()
-      .setSigningKey(getSigningKey())
+    return Jwts.parser()
+      .verifyWith(getSigningKey())
       .build()
-      .parseClaimsJws(token)
-      .getBody();
+      .parseSignedClaims(token)
+      .getPayload();
   }
 
   /**
@@ -138,7 +137,6 @@ public class JwtTokenProvider {
     final String username = extractUsername(token);
     return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
   }
-
 
   /**
    * Returns the secret key used for JWT signing.
