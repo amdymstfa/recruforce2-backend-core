@@ -41,7 +41,7 @@ public class ApplicationService {
   @Value("${ai.service.url}")
   private String aiServiceUrl;
 
-  @Value("${recruforce:matching.threshold:60}")
+  @Value("${matching.threshold:60}")
   private Integer matchingThreshold;
 
   /**
