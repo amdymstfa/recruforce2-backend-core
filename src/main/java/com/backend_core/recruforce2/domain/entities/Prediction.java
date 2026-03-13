@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Table(name = "predictions", indexes = {
   @Index(name = "idx_predictions_candidate_id", columnList = "candidate_id"),
   @Index(name = "idx_predictions_job_offer_id", columnList = "job_offer_id"),
-  @Index(name = "idx_predictions_created_at", columnList = "created_at")
+  @Index(name = "idx_predictions_calculated_at", columnList = "calculated_at")
 })
 @Getter
 @Setter
@@ -91,7 +91,6 @@ public class Prediction {
   // Business methods
   // -------------------------------------------------------
 
-  /** Calculates and stores the prediction result from the AI microservice */
   public void calculate(Double matchingScore, Double successProbability,
                         Double confidence, String mainFactors, String recommendation) {
     this.matchingScore = matchingScore;
@@ -101,10 +100,6 @@ public class Prediction {
     this.recommendation = recommendation;
   }
 
-  /**
-   * Returns a human-readable explanation of this prediction.
-   * Summarizes the main factors and recommendation.
-   */
   public String explain() {
     return String.format(
       "Candidate %s scored %.1f%% match for offer '%s'. " +
