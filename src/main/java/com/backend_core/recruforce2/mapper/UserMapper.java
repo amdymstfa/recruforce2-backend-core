@@ -26,6 +26,6 @@ public interface UserMapper {
   @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
   @Mapping(target = "updatedAt", expression = "java(java.time.LocalDateTime.now())")
   @Mapping(target = "notificationPreferences", ignore = true)
-  @Mapping(target = "authorities", ignore = true)
+//  @Mapping(target = "authorities", ignore = true)
   User toEntity(RegisterRequest request);
 }
