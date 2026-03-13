@@ -5,8 +5,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,12 +25,20 @@ import java.io.IOException;
  * If a valid token is found, it authenticates the user in Spring Security's context.
  */
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private final JwtTokenProvider jwtTokenProvider;
   private final UserDetailsService userDetailsService;
+
+  // Constructor avec @Lazy sur UserDetailsService
+  public JwtAuthenticationFilter(
+    JwtTokenProvider jwtTokenProvider,
+    @Lazy UserDetailsService userDetailsService
+  ) {
+    this.jwtTokenProvider = jwtTokenProvider;
+    this.userDetailsService = userDetailsService;
+  }
 
   @Override
   protected void doFilterInternal(
