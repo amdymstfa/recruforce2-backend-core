@@ -1,11 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 002-create-skills-table
+      id: 003-create-candidate-skills-table
       author: recruforce2
-      comment: "Creates the skills table — platform skill repository used by job offers and candidates"
       changes:
         - createTable:
-            tableName: skills
+            tableName: candidate_skills
             columns:
               - column:
                   name: id
@@ -14,29 +13,48 @@ databaseChangeLog:
                     primaryKey: true
                     nullable: false
               - column:
-                  name: name
-                  type: VARCHAR(100)
+                  name: candidate_id
+                  type: BIGINT
                   constraints:
                     nullable: false
               - column:
-                  name: type
+                  name: skill_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: mastery_level
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
               - column:
-                  name: required_level
-                  type: VARCHAR(20)
+                  name: years_experience
+                  type: INT
+
+        - addForeignKeyConstraint:
+            baseTableName: candidate_skills
+            baseColumnNames: candidate_id
+            referencedTableName: candidates
+            referencedColumnNames: id
+            constraintName: fk_candidate_skills_candidate
+
+        - addForeignKeyConstraint:
+            baseTableName: candidate_skills
+            baseColumnNames: skill_id
+            referencedTableName: skills
+            referencedColumnNames: id
+            constraintName: fk_candidate_skills_skill
 
         - createIndex:
-            indexName: idx_skills_name
-            tableName: skills
+            indexName: idx_candidate_skills_candidate_id
+            tableName: candidate_skills
             columns:
               - column:
-                  name: name
+                  name: candidate_id
 
         - createIndex:
-            indexName: idx_skills_type
-            tableName: skills
+            indexName: idx_candidate_skills_skill_id
+            tableName: candidate_skills
             columns:
               - column:
-                  name: type
+                  name: skill_id

@@ -155,7 +155,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                     foreignKeyName: fk_predictions_candidate
-                    references: candidates(id)
+                    references: candidate_profiles(id)
               - column:
                   name: job_offer_id
                   type: BIGINT

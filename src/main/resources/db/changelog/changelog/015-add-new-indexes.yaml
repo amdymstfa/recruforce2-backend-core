@@ -4,99 +4,62 @@ databaseChangeLog:
       author: recruforce2
       comment: "Adds additional performance indexes for interview, feedback, prediction and notification queries"
       changes:
-
-        # -------------------------------------------------------
-        # Interviews — combined queries
-        # -------------------------------------------------------
         - createIndex:
             indexName: idx_interviews_type_status
             tableName: interviews
             columns:
-              - column:
-                  name: type
-              - column:
-                  name: status
+              - column: { name: type }
+              - column: { name: status }
 
         - createIndex:
             indexName: idx_interviews_upcoming
             tableName: interviews
             columns:
-              - column:
-                  name: date_time
-              - column:
-                  name: status
+              - column: { name: date_time }
+              - column: { name: status }
 
-        # -------------------------------------------------------
-        # Feedbacks — score ranking
-        # -------------------------------------------------------
         - createIndex:
             indexName: idx_feedbacks_overall_score
             tableName: feedbacks
             columns:
-              - column:
-                  name: overall_score
+              - column: { name: overall_score }
 
-        # -------------------------------------------------------
-        # Predictions — score ranking and model tracking
-        # -------------------------------------------------------
         - createIndex:
             indexName: idx_predictions_matching_score
             tableName: predictions
             columns:
-              - column:
-                  name: matching_score
+              - column: { name: matching_score }
 
         - createIndex:
             indexName: idx_predictions_ml_model_id
             tableName: predictions
             columns:
-              - column:
-                  name: ml_model_id
+              - column: { name: ml_model_id }
 
-        # -------------------------------------------------------
-        # Notifications — unread per user (most common query)
-        # -------------------------------------------------------
         - createIndex:
             indexName: idx_notifications_unread
             tableName: notifications
             columns:
-              - column:
-                  name: recipient_id
-              - column:
-                  name: is_read
+              - column: { name: recipient_id }
+              - column: { name: is_read }
 
-        # -------------------------------------------------------
-        # Audit logs — action type filtering
-        # -------------------------------------------------------
         - createIndex:
             indexName: idx_audit_action
             tableName: audit_logs
             columns:
-              - column:
-                  name: action
+              - column: { name: action }
 
-        # -------------------------------------------------------
-        # Availabilities — available slots lookup
-        # -------------------------------------------------------
         - createIndex:
             indexName: idx_availability_user_available
             tableName: availabilities
             columns:
-              - column:
-                  name: user_id
-              - column:
-                  name: is_available
-              - column:
-                  name: start_date_time
+              - column: { name: user_id }
+              - column: { name: is_available }
+              - column: { name: start_date_time }
 
-        # -------------------------------------------------------
-        # ML models — active model lookup
-        # -------------------------------------------------------
         - createIndex:
             indexName: idx_ml_models_active_version
             tableName: ml_models
             columns:
-              - column:
-                  name: is_active
-              - column:
-                  name: version
+              - column: { name: is_active }
+              - column: { name: version }

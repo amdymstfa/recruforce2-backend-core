@@ -2,131 +2,24 @@ databaseChangeLog:
   - changeSet:
       id: 004-create-job-offers-table
       author: recruforce2
-      comment: "Creates the job_offers table and the job_offer_skills join table"
       changes:
-
-        # -------------------------------------------------------
-        # Main job offers table
-        # -------------------------------------------------------
         - createTable:
             tableName: job_offers
             columns:
-              - column:
-                  name: id
-                  type: BIGSERIAL
-                  constraints:
-                    primaryKey: true
-                    nullable: false
-              - column:
-                  name: title
-                  type: VARCHAR(200)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: description
-                  type: TEXT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: location
-                  type: VARCHAR(200)
-              - column:
-                  name: contract_type
-                  type: VARCHAR(20)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: status
-                  type: VARCHAR(20)
-                  defaultValue: DRAFT
-                  constraints:
-                    nullable: false
-              - column:
-                  name: min_experience
-                  type: INTEGER
-              - column:
-                  name: max_experience
-                  type: INTEGER
-              - column:
-                  name: min_salary
-                  type: DOUBLE PRECISION
-              - column:
-                  name: max_salary
-                  type: DOUBLE PRECISION
-              - column:
-                  name: publication_date
-                  type: DATE
-              - column:
-                  name: expiration_date
-                  type: DATE
-              - column:
-                  name: created_by
-                  type: BIGINT
-                  constraints:
-                    nullable: false
-                    foreignKeyName: fk_job_offers_created_by
-                    references: users(id)
-              - column:
-                  name: published_on_linkedin
-                  type: BOOLEAN
-                  defaultValueBoolean: false
-                  constraints:
-                    nullable: false
-              - column:
-                  name: linkedin_job_id
-                  type: VARCHAR(100)
-              - column:
-                  name: created_at
-                  type: TIMESTAMP
-                  constraints:
-                    nullable: false
-              - column:
-                  name: updated_at
-                  type: TIMESTAMP
-
-        - createIndex:
-            indexName: idx_job_offers_status
-            tableName: job_offers
-            columns:
-              - column:
-                  name: status
-
-        - createIndex:
-            indexName: idx_job_offers_created_by
-            tableName: job_offers
-            columns:
-              - column:
-                  name: created_by
-
-        - createIndex:
-            indexName: idx_job_offers_expiration
-            tableName: job_offers
-            columns:
-              - column:
-                  name: expiration_date
-
-        # -------------------------------------------------------
-        # Job offer skills join table (ManyToMany)
-        # -------------------------------------------------------
+              - column: { name: id, type: BIGSERIAL, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: title, type: VARCHAR(200), constraints: { nullable: false } }
+              - column: { name: description, type: TEXT, constraints: { nullable: false } }
+              - column: { name: location, type: VARCHAR(200) }
+              - column: { name: contract_type, type: VARCHAR(20), constraints: { nullable: false } }
+              - column: { name: status, type: VARCHAR(20), defaultValue: DRAFT, constraints: { nullable: false } }
+              - column: { name: created_by, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_job_offers_user, references: "users(id)" } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP }
         - createTable:
             tableName: job_offer_skills
             columns:
-              - column:
-                  name: job_offer_id
-                  type: BIGINT
-                  constraints:
-                    nullable: false
-                    foreignKeyName: fk_job_offer_skills_offer
-                    references: job_offers(id)
-              - column:
-                  name: skill_id
-                  type: BIGINT
-                  constraints:
-                    nullable: false
-                    foreignKeyName: fk_job_offer_skills_skill
-                    references: skills(id)
-
+              - column: { name: job_offer_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_jos_offer, references: "job_offers(id)" } }
+              - column: { name: skill_id, type: BIGINT, constraints: { nullable: false, foreignKeyName: fk_jos_skill, references: "skills(id)" } }
         - addPrimaryKey:
             tableName: job_offer_skills
             columnNames: job_offer_id, skill_id
-            constraintName: pk_job_offer_skills
