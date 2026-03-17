@@ -98,6 +98,10 @@ services:
       MONGODB_PORT: 27017
       MONGODB_DATABASE: recruforce2_prod
       BACKEND_API_URL: http://backend:8080
+      BACKEND_API_EMAIL: ai-service@recruforce2.internal
+      BACKEND_API_PASSWORD: AiService@Internal2024!
+    volumes:
+      - ai_models:/app/persistence/trained_models
     ports:
       - "8000:8000"
     networks:
@@ -171,6 +175,8 @@ volumes:
   postgres_data:
     driver: local
   mongo_data:
+    driver: local
+  ai_models:
     driver: local
   n8n_data:
     external: true
