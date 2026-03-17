@@ -98,8 +98,8 @@ services:
       MONGODB_PORT: 27017
       MONGODB_DATABASE: recruforce2_prod
       BACKEND_API_URL: http://backend:8080
-      BACKEND_API_EMAIL: ai-service@recruforce2.internal
-      BACKEND_API_PASSWORD: AiService@Internal2024!
+      BACKEND_API_EMAIL: ai-service2@recruforce2.internal
+      BACKEND_API_PASSWORD: AiService@2024!
     volumes:
       - ai_models:/app/persistence/trained_models
     ports:
@@ -155,11 +155,16 @@ services:
       N8N_BASIC_AUTH_USER: admin
       N8N_BASIC_AUTH_PASSWORD: ${N8N_PASSWORD:-admin123}
       WEBHOOK_URL: http://localhost:5678/
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
       GENERIC_TIMEZONE: Europe/Paris
-      # Variables pour les workflows
       AI_SERVICE_URL: http://ai-service:8000
       BACKEND_API_URL: http://backend:8080
-      SMTP_FROM: noreply@recruforce2.com
+      BACKEND_API_TOKEN: eyJhbGciOiJIUzM4NCJ9.eyJyb2xlIjoiUkVDUlVJVEVSIiwic3ViIjoiYWktc2VydmljZTJAcmVjcnVmb3JjZTIuaW50ZXJuYWwiLCJpYXQiOjE3NzM3NTIyOTcsImV4cCI6MTc3MzgzODY5N30.DvRPSNuzleU5B3LYrMBu4nBwx2XUqqKVIgiVRlvhrRmrJWmngS7HOhE4lY9P1mXh
+      SMTP_HOST: smtp.gmail.com
+      SMTP_PORT: "465"
+      SMTP_FROM: amdymoustapha011@gmail.com
+      SMTP_USER: amdymoustapha011@gmail.com
+      SMTP_PASS: bxrbmyupumvsdlgq
     ports:
       - "5678:5678"
     volumes:
