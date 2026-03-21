@@ -35,3 +35,15 @@ build/
 .env
 .env.local
 *.class
+
+# Logs
+logs/
+*.log
+
+# Backups
+*.sql
+
+# OS / IDE
+*.swp
+.idea/
+*.iml

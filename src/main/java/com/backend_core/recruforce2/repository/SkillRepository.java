@@ -20,6 +20,8 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
   /** Finds a skill by its exact name */
   Optional<Skill> findByName(String name);
 
+  Optional<Skill> findByNameIgnoreCase(String name);
+
   /** Checks if a skill with the given name already exists */
   boolean existsByName(String name);
 

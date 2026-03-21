@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -42,4 +44,12 @@ public class AuthController {
   public ResponseEntity<AuthResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
     return ResponseEntity.ok(authService.refreshToken(request.getRefreshToken()));
   }
+
+  @Operation(summary = "Generate service token for internal integrations (90 days)")
+  @PostMapping("/service-token")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<AuthResponse> generateServiceToken(Authentication authentication) {
+    return ResponseEntity.ok(authService.generateServiceToken(authentication.getName()));
+  }
+
 }

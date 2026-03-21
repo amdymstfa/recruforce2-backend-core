@@ -14,6 +14,10 @@ FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 RUN addgroup -S spring && adduser -S spring -G spring
+
+# Créer le dossier logs avec les bonnes permissions
+RUN mkdir -p /app/logs && chown -R spring:spring /app/logs
+
 USER spring:spring
 
 COPY --from=build /app/target/*.jar app.jar

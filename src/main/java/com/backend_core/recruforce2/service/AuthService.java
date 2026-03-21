@@ -150,4 +150,13 @@ public class AuthService implements UserDetailsService {
         new UsernameNotFoundException("User not found with email: " + username)
       );
   }
+
+  @Transactional(readOnly = true)
+  public AuthResponse generateServiceToken(String email) {
+    log.info("Generating service token for: {}", email);
+    User user = userRepository.findByEmail(email)
+      .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    String serviceToken = jwtTokenProvider.generateServiceToken(user);
+    return AuthResponse.of(serviceToken, null, userMapper.toResponse(user));
+  }
 }

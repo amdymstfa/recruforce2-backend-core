@@ -15,25 +15,20 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class InterviewResponse {
-
   private Long id;
   private Long applicationId;
   private String candidateName;
-
+  private String candidateEmail;
+  private String interviewerName;
+  private String interviewerEmail;
   private InterviewType type;
   private InterviewStatus status;
-
   private LocalDateTime dateTime;
   private Integer durationMinutes;
-
   private String location;
   private String videoLink;
-
   private Long interviewerId;
-  private String interviewerName;
-
   private String invitationToken;
   private LocalDateTime confirmationDate;
-
-  private Boolean hasFeedback;
+  private boolean hasFeedback;
 }

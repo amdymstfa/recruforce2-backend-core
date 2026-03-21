@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Request DTO for creating or updating a candidate profile.
@@ -36,4 +37,9 @@ public class CandidateProfileRequest {
   private String address;
 
   private LocalDate birthDate;
+
+  private String parsedCvId;
+
+  private List<String> skills;
+  private List<ExperienceRequest> experiences;
 }

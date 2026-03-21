@@ -44,6 +44,22 @@ public class JwtTokenProvider {
     return createToken(claims, userDetails.getUsername(), expiration);
   }
 
+
+  /**
+   * Generate a long-lived service token for internal services (N8N, etc.)
+   * Expires in 90 days
+   */
+  public String generateServiceToken(UserDetails userDetails) {
+    Map<String, Object> claims = new HashMap<>();
+    claims.put("role", userDetails.getAuthorities().stream()
+      .findFirst()
+      .map(auth -> auth.getAuthority().replace("ROLE_", ""))
+      .orElse("ADMIN"));
+    claims.put("type", "service");
+    long ninetyDays = 90L * 24 * 60 * 60 * 1000;
+    return createToken(claims, userDetails.getUsername(), ninetyDays);
+  }
+
   /**
    * Generate a refresh token for a user
    * @param userDetails the authenticate user
@@ -147,4 +163,5 @@ public class JwtTokenProvider {
     byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
     return Keys.hmacShaKeyFor(keyBytes);
   }
+
 }
