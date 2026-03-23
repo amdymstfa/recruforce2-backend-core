@@ -6,6 +6,9 @@ import com.backend_core.recruforce2.domain.entities.User;
 import com.backend_core.recruforce2.domain.enums.OfferStatus;
 import com.backend_core.recruforce2.dto.request.JobOfferRequest;
 import com.backend_core.recruforce2.dto.response.JobOfferResponse;
+import com.backend_core.recruforce2.dto.response.SkillResponse;
+import java.util.List;
+
 import com.backend_core.recruforce2.repository.JobOfferRepository;
 import com.backend_core.recruforce2.repository.SkillRepository;
 import com.backend_core.recruforce2.repository.UserRepository;
@@ -132,6 +135,17 @@ public class JobOfferService {
   }
 
   private JobOfferResponse mapToResponse(JobOffer jobOffer) {
+    List<SkillResponse> requiredSkills = jobOffer.getRequiredSkills() != null
+      ? jobOffer.getRequiredSkills().stream()
+          .map(s -> SkillResponse.builder()
+            .id(s.getId())
+            .name(s.getName())
+            .type(s.getType())
+            .requiredLevel(s.getRequiredLevel())
+            .build())
+          .toList()
+      : List.of();
+
     return JobOfferResponse.builder()
       .id(jobOffer.getId())
       .title(jobOffer.getTitle())
@@ -147,9 +161,11 @@ public class JobOfferService {
       .expirationDate(jobOffer.getExpirationDate())
       .createdById(jobOffer.getCreatedBy().getId())
       .createdByName(jobOffer.getCreatedBy().getFullName())
+      .requiredSkills(requiredSkills)
       .publishedOnLinkedin(jobOffer.getPublishedOnLinkedin())
       .applicationsCount(jobOffer.getStatistics())
       .createdAt(jobOffer.getCreatedAt())
+      .updatedAt(jobOffer.getUpdatedAt())
       .build();
   }
 }

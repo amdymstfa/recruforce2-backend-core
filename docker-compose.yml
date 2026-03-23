@@ -64,6 +64,7 @@ services:
       MONGODB_URI: mongodb://recruforce2-mongo:27017/${DB_NAME}
       AI_SERVICE_URL: ${AI_SERVICE_URL}
       JWT_SECRET: ${JWT_SECRET}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
     ports:
       - "8080:8080"
     networks:

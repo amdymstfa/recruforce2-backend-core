@@ -19,6 +19,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import com.backend_core.recruforce2.dto.response.CandidateSkillResponse;
+import com.backend_core.recruforce2.dto.response.ExperienceResponse;
+import com.backend_core.recruforce2.dto.response.EducationResponse;
+import com.backend_core.recruforce2.dto.response.LanguageResponse;
+import java.util.List;
+
+import com.backend_core.recruforce2.dto.response.CandidateSkillResponse;
+import com.backend_core.recruforce2.dto.response.ExperienceResponse;
+import com.backend_core.recruforce2.dto.response.EducationResponse;
+import com.backend_core.recruforce2.dto.response.LanguageResponse;
+import java.util.List;
+
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -132,6 +144,60 @@ public class CandidateService {
   }
 
   private CandidateProfileResponse mapToResponse(Candidate candidate) {
+    // Map skills
+    List<CandidateSkillResponse> skills = candidate.getSkills() != null
+      ? candidate.getSkills().stream()
+          .map(cs -> CandidateSkillResponse.builder()
+            .id(cs.getId())
+            .name(cs.getSkill().getName())
+            .type(cs.getSkill().getType())
+            .masteryLevel(cs.getMasteryLevel())
+            .yearsExperience(cs.getYearsExperience())
+            .build())
+          .toList()
+      : List.of();
+
+    // Map experiences
+    List<ExperienceResponse> experiences = candidate.getExperiences() != null
+      ? candidate.getExperiences().stream()
+          .map(e -> ExperienceResponse.builder()
+            .id(e.getId())
+            .position(e.getPosition())
+            .company(e.getCompany())
+            .description(e.getDescription())
+            .startDate(e.getStartDate())
+            .endDate(e.getEndDate())
+            .isCurrent(e.getIsCurrent())
+            .build())
+          .toList()
+      : List.of();
+
+    // Map educations
+    List<EducationResponse> educations = candidate.getEducations() != null
+      ? candidate.getEducations().stream()
+          .map(e -> EducationResponse.builder()
+            .id(e.getId())
+            .degree(e.getDegree())
+            .institution(e.getInstitution())
+            .field(e.getField())
+            .startDate(e.getStartDate())
+            .endDate(e.getEndDate())
+            .yearsObtained(e.getYearsObtained())
+            .build())
+          .toList()
+      : List.of();
+
+    // Map languages
+    List<LanguageResponse> languages = candidate.getLanguages() != null
+      ? candidate.getLanguages().stream()
+          .map(l -> LanguageResponse.builder()
+            .id(l.getId())
+            .name(l.getName())
+            .level(l.getLevel())
+            .build())
+          .toList()
+      : List.of();
+
     return CandidateProfileResponse.builder()
       .id(candidate.getId())
       .firstName(candidate.getFirstName())
@@ -142,6 +208,10 @@ public class CandidateService {
       .birthDate(candidate.getBirthDate())
       .cvPath(candidate.getCvPath())
       .parsedCvId(candidate.getParsedCvId())
+      .skills(skills)
+      .experiences(experiences)
+      .educations(educations)
+      .languages(languages)
       .applicationsCount(candidate.getApplications() != null ? candidate.getApplications().size() : 0)
       .createdAt(candidate.getCreatedAt())
       .build();
