@@ -30,21 +30,23 @@ public class CandidateController {
 
   @Operation(summary = "Create a new candidate profile")
   @PostMapping
-  @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+  @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN', 'ROLE_ADMIN')")
   public ResponseEntity<CandidateProfileResponse> create(
     @Valid @RequestBody CandidateProfileRequest request) {
     return ResponseEntity.status(HttpStatus.CREATED)
       .body(candidateService.create(request));
   }
 
-  @Operation(summary = "Upload CV for a candidate")
+  @Operation(summary = "Upload CV for a candidate and trigger workflow")
   @PostMapping("/{id}/cv")
-  @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+  @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN', 'ROLE_ADMIN')")
   public ResponseEntity<Void> uploadCv(
     @PathVariable Long id,
     @RequestParam("file") MultipartFile file,
-    @RequestParam(required = false) String parsedCvId) {
-    candidateService.uploadCv(id, file, parsedCvId);
+    @RequestParam(value = "parsedCvId", required = false) String parsedCvId,
+    @RequestParam("jobOfferId") Long jobOfferId) { // <--- AJOUT DU PARAMÈTRE ICI
+
+    candidateService.uploadCv(id, file, parsedCvId, jobOfferId);
     return ResponseEntity.ok().build();
   }
 

@@ -1,5 +1,4 @@
 package com.backend_core.recruforce2.controller;
-
 import com.backend_core.recruforce2.domain.entities.User;
 import com.backend_core.recruforce2.dto.response.UserResponse;
 import com.backend_core.recruforce2.service.UserService;
@@ -16,7 +15,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RECRUITER', 'MANAGER')")
     public ResponseEntity<List<UserResponse>> getAll() {
         return ResponseEntity.ok(userService.getAllUsers());
     }

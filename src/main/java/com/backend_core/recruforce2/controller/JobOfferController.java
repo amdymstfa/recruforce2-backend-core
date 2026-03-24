@@ -16,10 +16,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * REST controller for job offer management.
- * Requires RECRUITER or ADMIN role.
- */
 @RestController
 @RequestMapping("/api/job-offers")
 @RequiredArgsConstructor
@@ -32,20 +28,14 @@ public class JobOfferController {
   @Operation(summary = "Create a new job offer")
   @PostMapping
   @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
-  public ResponseEntity<JobOfferResponse> create(
-    @Valid @RequestBody JobOfferRequest request,
-    Authentication authentication) {
-    Long userId = getUserId(authentication);
-    return ResponseEntity.status(HttpStatus.CREATED)
-      .body(jobOfferService.create(request, userId));
+  public ResponseEntity<JobOfferResponse> create(@Valid @RequestBody JobOfferRequest request, Authentication authentication) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(jobOfferService.create(request, getUserId(authentication)));
   }
 
   @Operation(summary = "Update an existing job offer")
   @PutMapping("/{id}")
   @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
-  public ResponseEntity<JobOfferResponse> update(
-    @PathVariable Long id,
-    @Valid @RequestBody JobOfferRequest request) {
+  public ResponseEntity<JobOfferResponse> update(@PathVariable Long id, @Valid @RequestBody JobOfferRequest request) {
     return ResponseEntity.ok(jobOfferService.update(id, request));
   }
 
@@ -67,21 +57,22 @@ public class JobOfferController {
 
   @Operation(summary = "Get job offer by ID")
   @GetMapping("/{id}")
+  @PreAuthorize("hasAnyRole('RECRUITER', 'MANAGER', 'ADMIN')")
   public ResponseEntity<JobOfferResponse> getById(@PathVariable Long id) {
     return ResponseEntity.ok(jobOfferService.getById(id));
   }
 
-  @Operation(summary = "Get all job offers (paginated)")
+  @Operation(summary = "Get all job offers")
   @GetMapping
+  @PreAuthorize("hasAnyRole('RECRUITER', 'MANAGER', 'ADMIN')")
   public ResponseEntity<Page<JobOfferResponse>> getAll(Pageable pageable) {
     return ResponseEntity.ok(jobOfferService.getAll(pageable));
   }
 
-  @Operation(summary = "Search job offers by keyword")
+  @Operation(summary = "Search job offers")
   @GetMapping("/search")
-  public ResponseEntity<Page<JobOfferResponse>> search(
-    @RequestParam String keyword,
-    Pageable pageable) {
+  @PreAuthorize("hasAnyRole('RECRUITER', 'MANAGER', 'ADMIN')")
+  public ResponseEntity<Page<JobOfferResponse>> search(@RequestParam String keyword, Pageable pageable) {
     return ResponseEntity.ok(jobOfferService.searchByKeyword(keyword, pageable));
   }
 

@@ -17,16 +17,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 /**
  * Spring Security configuration for JWT-based authentication.
- * <p>
- * Configures:
- * - Stateless session management (JWT-based)
- * - Public and protected endpoints
- * - JWT authentication filter
- * - Password encoding (BCrypt)
- * - CORS integration
  */
 @Configuration
 @EnableWebSecurity
@@ -35,63 +29,56 @@ public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthFilter;
   private final UserDetailsService userDetailsService;
+  private final CorsConfigurationSource corsConfigurationSource;
 
   public SecurityConfig(
     @Lazy JwtAuthenticationFilter jwtAuthFilter,
-    @Lazy UserDetailsService userDetailsService
+    @Lazy UserDetailsService userDetailsService,
+    CorsConfigurationSource corsConfigurationSource
   ) {
     this.jwtAuthFilter = jwtAuthFilter;
     this.userDetailsService = userDetailsService;
+    this.corsConfigurationSource = corsConfigurationSource;
   }
 
-  /**
-   * Configures the security filter chain.
-   * Defines which endpoints are public and which require authentication.
-   */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
       .csrf(AbstractHttpConfigurer::disable)
-      .cors(cors -> cors.configure(http))
+      .cors(cors -> cors.configurationSource(corsConfigurationSource))
       .authorizeHttpRequests(auth -> auth
-        // Public endpoints
+
         .requestMatchers(
           "/api/auth/**",
           "/api/public/**",
           "/swagger-ui/**",
           "/v3/api-docs/**",
           "/swagger-ui.html",
-          "/actuator/health",
-          "/actuator/info",
-          "/api/applications/{$id}/status"
+          "/actuator/**", // Pour le healthcheck Docker
+          "/actuator/health/**"
         ).permitAll()
 
-        // Admin-only endpoints
+        // 2. Endpoints réservés aux Admins
         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+        .requestMatchers("/api/users/**").hasRole("ADMIN")
 
-        // Recruiter and Admin endpoints
-        .requestMatchers("/api/job-offers/**", "/api/applications/**")
-        .hasAnyRole("RECRUITER", "ADMIN")
 
-        // Manager, Recruiter, and Admin endpoints
-        .requestMatchers("/api/interviews/**", "/api/feedbacks/**")
+        .requestMatchers("/api/job-offers/**", "/api/applications/**").hasAnyRole("RECRUITER", "ADMIN")
+
+
+        .requestMatchers("/api/candidates/**", "/api/interviews/**", "/api/feedbacks/**", "/api/ml-models/**", "/api/predictions/**")
         .hasAnyRole("MANAGER", "RECRUITER", "ADMIN")
 
-        // All other requests require authentication
+
         .anyRequest().authenticated()
       )
-      .sessionManagement(session -> session
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-      )
+      .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .authenticationProvider(authenticationProvider())
       .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
 
-  /**
-   * Configures the authentication provider with UserDetailsService and password encoder.
-   */
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -100,17 +87,11 @@ public class SecurityConfig {
     return authProvider;
   }
 
-  /**
-   * Provides the authentication manager bean.
-   */
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
     return config.getAuthenticationManager();
   }
 
-  /**
-   * BCrypt password encoder with strength 12.
-   */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder(12);

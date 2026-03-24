@@ -134,6 +134,12 @@ public class InterviewService {
   }
 
   @Transactional(readOnly = true)
+  public List<InterviewResponse> getAll() {
+    return interviewRepository.findAll().stream()
+      .map(this::mapToResponse)
+      .toList();
+  }
+
   public InterviewResponse getById(Long id) {
     Interview interview = interviewRepository.findById(id)
       .orElseThrow(() -> new IllegalArgumentException("Interview not found"));

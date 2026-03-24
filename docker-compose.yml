@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # PostgreSQL
+  # PostgreSQL : Base de données structurées et Audit Logs
   postgres:
     image: postgres:15-alpine
     container_name: recruforce2-postgres
@@ -25,7 +25,7 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # MongoDB
+  # MongoDB : Stockage des CVs parsés et Logs IA
   mongo:
     image: mongo:7
     container_name: recruforce2-mongo
@@ -47,7 +47,7 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # Backend
+  # Backend Java Spring Boot
   backend:
     build: .
     image: ${DOCKER_HUB_USER:-moustapha}/recruforce2-backend:latest
@@ -65,22 +65,26 @@ services:
       AI_SERVICE_URL: ${AI_SERVICE_URL}
       JWT_SECRET: ${JWT_SECRET}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      # Connexion vers n8n (Nom du service Docker + préfixe /webhook/ obligatoire)
+      N8N_CV_WEBHOOK: http://recruforce2-n8n:5678/webhook/cv-parsing
+      N8N_APP_WEBHOOK: http://recruforce2-n8n:5678/webhook/application
     ports:
       - "8080:8080"
     networks:
       - recruforce2-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health || exit 1"]
-      interval: 15s
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/job-offers || exit 1"]
+      interval: 40s
       timeout: 10s
       retries: 5
+      start_period: 90s
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
 
-  # AI Service
+  # AI Service (FastAPI + spaCy)
   ai-service:
     build: ../recruforce2-ai-model
     image: ${DOCKER_HUB_USER:-moustapha}/recruforce2-ai-service:latest
@@ -103,7 +107,7 @@ services:
       - recruforce2-network
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
-      interval: 10s
+      interval: 20s
       timeout: 5s
       retries: 5
     logging:
@@ -112,7 +116,7 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  # N8N
+  # N8N : Orchestrateur de Workflows
   n8n:
     image: n8nio/n8n:latest
     container_name: recruforce2-n8n
@@ -127,26 +131,34 @@ services:
       - DB_POSTGRESDB_PASSWORD=${DB_PASSWORD}
       - N8N_AUTH_ENABLED=false
       - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
-      - WEBHOOK_URL=http://localhost:5678/
+      - N8N_HOST=recruforce2-n8n
       - BACKEND_API_URL=${BACKEND_URL}
       - BACKEND_API_TOKEN=${BACKEND_API_TOKEN}
       - AI_SERVICE_URL=${AI_SERVICE_URL}
       - SMTP_USER=${SMTP_USER}
       - SMTP_PASS=${SMTP_PASS}
       - SMTP_FROM=${SMTP_FROM}
+      - N8N_URL=http://recruforce2-n8n:5678/
+      - WEBHOOK_URL=http://recruforce2-n8n:5678/
     ports:
       - "5678:5678"
     volumes:
       - n8n_data:/home/node/.n8n
     networks:
       - recruforce2-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
 
-  # Frontend
+  # Frontend Angular (Nginx)
   frontend:
     build: ../recruforce2-frontend
     image: ${DOCKER_HUB_USER:-moustapha}/recruforce2-frontend:latest

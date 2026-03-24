@@ -1,8 +1,8 @@
-package com.backend_core.recruforce2.dto.response;
+package com.backend_core.recruforce2.dto.request;
 import lombok.*;
+
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
-public class LanguageResponse {
-    private Long id;
+public class LanguageRequest {
     private String name;
     private String level;
 }

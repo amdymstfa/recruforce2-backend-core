@@ -124,6 +124,15 @@ public class JobOfferService {
     return jobOfferRepository.searchByKeyword(keyword, pageable).map(this::mapToResponse);
   }
 
+
+
+  @Transactional(readOnly = true)
+  public Page<JobOfferResponse> getActiveOffers(Pageable pageable) {
+    return jobOfferRepository.findByStatus(
+      com.backend_core.recruforce2.domain.enums.OfferStatus.ACTIVE, pageable
+    ).map(this::mapToResponse);
+  }
+
   private void publishToLinkedIn(JobOffer jobOffer) {
     // TODO: Integrate with LinkedIn API via N8N webhook
     log.info("Publishing job offer to LinkedIn: {}", jobOffer.getId());

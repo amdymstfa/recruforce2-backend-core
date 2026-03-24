@@ -61,6 +61,12 @@ public class InterviewController {
   }
 
   @Operation(summary = "Get interview by ID")
+  @GetMapping
+  @PreAuthorize("hasAnyRole('RECRUITER', 'MANAGER', 'ADMIN')")
+  public ResponseEntity<List<InterviewResponse>> getAll() {
+    return ResponseEntity.ok(interviewService.getAll());
+  }
+
   @GetMapping("/{id}")
   @PreAuthorize("hasAnyRole('RECRUITER', 'MANAGER', 'ADMIN')")
   public ResponseEntity<InterviewResponse> getById(@PathVariable Long id) {
