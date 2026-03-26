@@ -1,9 +1,9 @@
 package com.backend_core.recruforce2.controller;
 
+import com.backend_core.recruforce2.domain.enums.ApplicationStatus;
 import com.backend_core.recruforce2.dto.request.ApplicationRequest;
 import com.backend_core.recruforce2.dto.response.ApplicationResponse;
 import com.backend_core.recruforce2.service.ApplicationService;
-import com.backend_core.recruforce2.domain.enums.ApplicationStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,23 +27,41 @@ public class ApplicationController {
 
   @PostMapping
   public ResponseEntity<ApplicationResponse> submit(@Valid @RequestBody ApplicationRequest request) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(applicationService.submit(request));
+    return ResponseEntity.status(HttpStatus.CREATED)
+      .body(applicationService.submit(request));
   }
 
-  @PatchMapping("/{id}/score")
+  @GetMapping
   @PreAuthorize("hasAnyRole('ADMIN', 'RECRUITER')")
-  public ResponseEntity<Void> updateScore(@PathVariable Long id, @RequestParam Integer score) {
-    applicationService.updateScore(id, score);
-    return ResponseEntity.ok().build();
+  public ResponseEntity<Page<ApplicationResponse>> getAll(Pageable pageable) {
+    return ResponseEntity.ok(applicationService.getAll(pageable));
   }
 
   @GetMapping("/{id}")
+  @PreAuthorize("hasAnyRole('ADMIN', 'RECRUITER', 'MANAGER')")
   public ResponseEntity<ApplicationResponse> getById(@PathVariable Long id) {
     return ResponseEntity.ok(applicationService.getById(id));
   }
 
   @GetMapping("/job-offer/{jobOfferId}")
-  public ResponseEntity<Page<ApplicationResponse>> getByJobOffer(@PathVariable Long jobOfferId, Pageable pageable) {
+  @PreAuthorize("hasAnyRole('ADMIN', 'RECRUITER', 'MANAGER')")
+  public ResponseEntity<Page<ApplicationResponse>> getByJobOffer(
+    @PathVariable Long jobOfferId, Pageable pageable) {
     return ResponseEntity.ok(applicationService.getByJobOffer(jobOfferId, pageable));
+  }
+
+  @PatchMapping("/{id}/score")
+  @PreAuthorize("hasAnyRole('ADMIN', 'RECRUITER')")
+  public ResponseEntity<Void> updateScore(
+    @PathVariable Long id, @RequestParam Integer score) {
+    applicationService.updateScore(id, score);
+    return ResponseEntity.ok().build();
+  }
+
+  @PatchMapping("/{id}/status")
+  @PreAuthorize("hasAnyRole('ADMIN', 'RECRUITER')")
+  public ResponseEntity<ApplicationResponse> changeStatus(
+    @PathVariable Long id, @RequestParam ApplicationStatus status) {
+    return ResponseEntity.ok(applicationService.changeStatus(id, status));
   }
 }

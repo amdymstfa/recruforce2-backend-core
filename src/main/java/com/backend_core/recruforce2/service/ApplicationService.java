@@ -20,18 +20,20 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ApplicationService {
 
-  private final ApplicationRepository applicationRepository;
+  private final ApplicationRepository     applicationRepository;
   private final CandidateProfileRepository candidateRepository;
-  private final JobOfferRepository jobOfferRepository;
-  private final EmailService emailService;
-  private final NotificationService notificationService;
+  private final JobOfferRepository        jobOfferRepository;
   private final RestTemplate restTemplate = new RestTemplate();
 
   @Value("${n8n.app-webhook:http://recruforce2-n8n:5678/webhook/application}")
@@ -40,6 +42,9 @@ public class ApplicationService {
   @Value("${matching.threshold:60}")
   private Integer matchingThreshold;
 
+  // -------------------------------------------------------
+  // Submit
+  // -------------------------------------------------------
   @Transactional
   public ApplicationResponse submit(ApplicationRequest request) {
     Candidate candidate = candidateRepository.findById(request.getCandidateId())
@@ -48,7 +53,8 @@ public class ApplicationService {
     JobOffer jobOffer = jobOfferRepository.findById(request.getJobOfferId())
       .orElseThrow(() -> new IllegalArgumentException("Job offer not found"));
 
-    if (applicationRepository.existsByCandidateIdAndJobOfferId(request.getCandidateId(), request.getJobOfferId())) {
+    if (applicationRepository.existsByCandidateIdAndJobOfferId(
+      request.getCandidateId(), request.getJobOfferId())) {
       throw new IllegalArgumentException("Application already exists");
     }
 
@@ -63,30 +69,13 @@ public class ApplicationService {
       .build();
 
     application = applicationRepository.save(application);
-
-    // Envoi du signal à n8n pour le traitement automatique (Score + Emails)
     triggerN8nApplicationWorkflow(application);
-
     return mapToResponse(application);
   }
 
-  private void triggerN8nApplicationWorkflow(Application app) {
-    try {
-      Map<String, Object> payload = new HashMap<>();
-      payload.put("applicationId", app.getId());
-      payload.put("candidateId", app.getCandidate().getId());
-      payload.put("jobOfferId", app.getJobOffer().getId());
-      payload.put("candidateName", app.getCandidate().getFullName());
-      payload.put("candidateEmail", app.getCandidate().getEmail());
-      payload.put("jobTitle", app.getJobOffer().getTitle());
-
-      restTemplate.postForEntity(n8nAppWebhookUrl, payload, String.class);
-      log.info("N8N Application Workflow triggered for app: {}", app.getId());
-    } catch (Exception e) {
-      log.error("Failed to trigger N8N application workflow: {}", e.getMessage());
-    }
-  }
-
+  // -------------------------------------------------------
+  // Score
+  // -------------------------------------------------------
   @Transactional
   public void updateScore(Long id, Integer score) {
     Application app = applicationRepository.findById(id).orElseThrow();
@@ -96,19 +85,38 @@ public class ApplicationService {
 
   @Transactional
   public ApplicationResponse changeStatus(Long id, ApplicationStatus newStatus) {
-    Application app = applicationRepository.findById(id).orElseThrow();
+    Application app = applicationRepository.findById(id)
+      .orElseThrow(() -> new IllegalArgumentException("Application not found: " + id));
     app.changeStatus(newStatus);
     return mapToResponse(applicationRepository.save(app));
   }
 
+  // -------------------------------------------------------
+  // Read
+  // -------------------------------------------------------
   @Transactional(readOnly = true)
   public ApplicationResponse getById(Long id) {
-    return applicationRepository.findById(id).map(this::mapToResponse).orElseThrow();
+    return applicationRepository.findById(id)
+      .map(this::mapToResponse)
+      .orElseThrow(() -> new IllegalArgumentException("Application not found: " + id));
   }
 
   @Transactional(readOnly = true)
   public Page<ApplicationResponse> getByJobOffer(Long jobOfferId, Pageable pageable) {
-    return applicationRepository.findByJobOfferId(jobOfferId, pageable).map(this::mapToResponse);
+    return applicationRepository.findByJobOfferId(jobOfferId, pageable)
+      .map(this::mapToResponse);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<ApplicationResponse> getAll(Pageable pageable) {
+    return applicationRepository.findAll(pageable).map(this::mapToResponse);
+  }
+
+  // -------------------------------------------------------
+  // Mapper — package-visible pour DashboardService
+  // -------------------------------------------------------
+  ApplicationResponse mapToResponsePublic(Application application) {
+    return mapToResponse(application);
   }
 
   private ApplicationResponse mapToResponse(Application application) {
@@ -126,5 +134,31 @@ public class ApplicationService {
       .coverLetter(application.getCoverLetter())
       .sourceChannel(application.getSourceChannel())
       .build();
+  }
+
+  // -------------------------------------------------------
+  // N8N
+  // -------------------------------------------------------
+  private void triggerN8nApplicationWorkflow(Application app) {
+    try {
+      Map<String, Object> payload = new HashMap<>();
+      payload.put("applicationId",   app.getId());
+      payload.put("candidateId",     app.getCandidate().getId());
+      payload.put("jobOfferId",      app.getJobOffer().getId());
+      payload.put("candidateName",   app.getCandidate().getFullName());
+      payload.put("candidateEmail",  app.getCandidate().getEmail());
+      payload.put("jobTitle",        app.getJobOffer().getTitle());
+      restTemplate.postForEntity(n8nAppWebhookUrl, payload, String.class);
+      log.info("N8N Application Workflow triggered for app: {}", app.getId());
+    } catch (Exception e) {
+      log.error("Failed to trigger N8N application workflow: {}", e.getMessage());
+    }
+  }
+
+  public List<Application> getJobOfferVyId(Long id){
+    return applicationRepository.findJobOfferById(id).stream()
+      .map(Candidate::getCandidate)
+      .collect(Collectors.toList());
+      
   }
 }

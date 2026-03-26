@@ -80,12 +80,20 @@ public class InterviewController {
     return ResponseEntity.ok(interviewService.getByApplication(applicationId));
   }
 
-  @Operation(summary = "Get upcoming interviews for current user")
+  @Operation(summary = "Get interviews based on role")
   @GetMapping("/upcoming")
   @PreAuthorize("hasAnyRole('RECRUITER', 'MANAGER', 'ADMIN')")
   public ResponseEntity<List<InterviewResponse>> getUpcoming(Authentication authentication) {
-    Long userId = getUserId(authentication);
-    return ResponseEntity.ok(interviewService.getUpcomingByInterviewer(userId));
+    com.backend_core.recruforce2.domain.entities.User user =
+      (com.backend_core.recruforce2.domain.entities.User) authentication.getPrincipal();
+
+    String role = user.getRole().name();
+
+    if ("ADMIN".equals(role)) {
+      return ResponseEntity.ok(interviewService.getAll());
+    }
+
+    return ResponseEntity.ok(interviewService.getUpcomingByInterviewer(user.getId()));
   }
 
   private Long getUserId(Authentication authentication) {

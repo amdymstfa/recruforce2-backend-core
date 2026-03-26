@@ -18,9 +18,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Service for managing interviews.
- */
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -32,13 +29,9 @@ public class InterviewService {
   private final EmailService emailService;
   private final NotificationService notificationService;
 
-  /**
-   * Schedules a new interview.
-   */
   @Transactional
   public InterviewResponse schedule(InterviewRequest request) {
-    log.info("Scheduling interview: applicationId={}, type={}",
-      request.getApplicationId(), request.getType());
+    log.info("Scheduling interview: applicationId={}, type={}", request.getApplicationId(), request.getType());
 
     Application application = applicationRepository.findById(request.getApplicationId())
       .orElseThrow(() -> new IllegalArgumentException("Application not found"));
@@ -46,9 +39,7 @@ public class InterviewService {
     User interviewer = userRepository.findById(request.getInterviewerId())
       .orElseThrow(() -> new IllegalArgumentException("Interviewer not found"));
 
-    // Check if interview of this type already exists
-    interviewRepository.findByApplicationIdAndType(
-        request.getApplicationId(), request.getType())
+    interviewRepository.findByApplicationIdAndType(request.getApplicationId(), request.getType())
       .ifPresent(i -> {
         throw new IllegalArgumentException("Interview already scheduled");
       });
@@ -65,19 +56,12 @@ public class InterviewService {
       .build();
 
     interview = interviewRepository.save(interview);
-
-    // Send invitation email
     emailService.sendInterviewInvitation(interview);
-
-    // Notify interviewer
     notificationService.notifyInterviewScheduled(interviewer, interview);
 
     return mapToResponse(interview);
   }
 
-  /**
-   * Confirms an interview (typically called by candidate via invitation link).
-   */
   @Transactional
   public InterviewResponse confirm(String invitationToken) {
     Interview interview = interviewRepository.findByInvitationToken(invitationToken)
@@ -87,9 +71,6 @@ public class InterviewService {
     return mapToResponse(interviewRepository.save(interview));
   }
 
-  /**
-   * Cancels an interview.
-   */
   @Transactional
   public void cancel(Long id) {
     Interview interview = interviewRepository.findById(id)
@@ -97,12 +78,8 @@ public class InterviewService {
 
     interview.cancel();
     interviewRepository.save(interview);
-    log.info("Interview cancelled: {}", id);
   }
 
-  /**
-   * Reschedules an interview to a new date/time.
-   */
   @Transactional
   public InterviewResponse reschedule(Long id, LocalDateTime newDateTime) {
     Interview interview = interviewRepository.findById(id)
@@ -110,27 +87,17 @@ public class InterviewService {
 
     interview.reschedule(newDateTime);
     interviewRepository.save(interview);
-
-    // Send updated invitation
     emailService.sendInterviewInvitation(interview);
 
     return mapToResponse(interview);
   }
 
-  /**
-   * Sends reminders for upcoming interviews (scheduled job).
-   */
   @Transactional
   public void sendUpcomingReminders() {
     LocalDateTime now = LocalDateTime.now();
     LocalDateTime in24h = now.plusHours(24);
-
     List<Interview> upcomingInterviews = interviewRepository.findNeedingReminders(now, in24h);
-
-    upcomingInterviews.forEach(interview -> {
-      emailService.sendInterviewReminder(interview);
-      log.info("Reminder sent for interview: {}", interview.getId());
-    });
+    upcomingInterviews.forEach(emailService::sendInterviewReminder);
   }
 
   @Transactional(readOnly = true)
@@ -140,6 +107,7 @@ public class InterviewService {
       .toList();
   }
 
+  @Transactional(readOnly = true)
   public InterviewResponse getById(Long id) {
     Interview interview = interviewRepository.findById(id)
       .orElseThrow(() -> new IllegalArgumentException("Interview not found"));
@@ -155,32 +123,40 @@ public class InterviewService {
 
   @Transactional(readOnly = true)
   public List<InterviewResponse> getUpcomingByInterviewer(Long interviewerId) {
-    LocalDateTime now = LocalDateTime.now();
-    LocalDateTime inOneWeek = now.plusWeeks(1);
-
-    return interviewRepository.findUpcomingByInterviewer(interviewerId, now, inOneWeek).stream()
+    return interviewRepository.findUpcomingByInterviewer(interviewerId, LocalDateTime.now().minusDays(1)).stream()
       .map(this::mapToResponse)
       .collect(Collectors.toList());
   }
 
   private InterviewResponse mapToResponse(Interview interview) {
-    return InterviewResponse.builder()
+    if (interview == null) return null;
+
+    InterviewResponse.InterviewResponseBuilder builder = InterviewResponse.builder()
       .id(interview.getId())
-      .applicationId(interview.getApplication().getId())
-      .candidateEmail(interview.getApplication().getCandidate().getEmail())
-      .candidateName(interview.getApplication().getCandidate().getFullName())
-      .interviewerEmail(interview.getInterviewer().getEmail()) 
       .type(interview.getType())
       .status(interview.getStatus())
       .dateTime(interview.getDateTime())
       .durationMinutes(interview.getDurationMinutes())
       .location(interview.getLocation())
       .videoLink(interview.getVideoLink())
-      .interviewerId(interview.getInterviewer().getId())
-      .interviewerName(interview.getInterviewer().getFullName())
       .invitationToken(interview.getInvitationToken())
       .confirmationDate(interview.getConfirmationDate())
-      .hasFeedback(interview.getFeedback() != null)
-      .build();
+      .hasFeedback(interview.getFeedback() != null);
+
+    if (interview.getApplication() != null) {
+      builder.applicationId(interview.getApplication().getId());
+      if (interview.getApplication().getCandidate() != null) {
+        builder.candidateEmail(interview.getApplication().getCandidate().getEmail());
+        builder.candidateName(interview.getApplication().getCandidate().getFullName());
+      }
+    }
+
+    if (interview.getInterviewer() != null) {
+      builder.interviewerId(interview.getInterviewer().getId());
+      builder.interviewerName(interview.getInterviewer().getFullName());
+      builder.interviewerEmail(interview.getInterviewer().getEmail());
+    }
+
+    return builder.build();
   }
 }

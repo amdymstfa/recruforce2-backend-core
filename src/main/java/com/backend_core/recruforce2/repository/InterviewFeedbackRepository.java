@@ -64,4 +64,7 @@ public interface InterviewFeedbackRepository extends JpaRepository<Feedback, Lon
     "ORDER BY f.overallScore DESC")
   List<Feedback> findTopRatedByJobOffer(@Param("jobOfferId") Long jobOfferId,
                                         @Param("threshold") Integer threshold);
+
+  @Query("SELECT AVG(f.overallScore) FROM Feedback f WHERE f.overallScore IS NOT NULL")
+  Double findAverageOverallScore();
 }

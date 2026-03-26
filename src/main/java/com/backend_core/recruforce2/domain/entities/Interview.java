@@ -66,6 +66,10 @@ public class Interview {
   @JoinColumn(name = "interviewer_id", nullable = false)
   private User interviewer;
 
+  @Column(name = "reminder_sent")
+  @Builder.Default
+  private Boolean reminderSent = false;
+
   /**
    * Unique token sent to the candidate to confirm their slot selection.
    * Generated automatically on creation.

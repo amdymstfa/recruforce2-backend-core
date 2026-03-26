@@ -1,6 +1,7 @@
 package com.backend_core.recruforce2.repository;
 
 import com.backend_core.recruforce2.domain.entities.Application;
+import com.backend_core.recruforce2.domain.entities.JobOffer;
 import com.backend_core.recruforce2.domain.enums.ApplicationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -67,4 +68,20 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
   @Query("SELECT a.jobOffer.id, COUNT(a) FROM Application a " +
     "GROUP BY a.jobOffer.id")
   List<Object[]> countPerJobOffer();
+
+  @Query("SELECT COUNT(a) FROM Application a WHERE a.receivedAt >= CURRENT_DATE")
+  long countApplicationsToday();
+
+  @Query("SELECT AVG(a.matchingScore) FROM Application a WHERE a.matchingScore IS NOT NULL")
+  Double getAverageMatchingScore();
+
+  // Pour le Map (Status -> Count)
+  @Query("SELECT a.status, COUNT(a) FROM Application a GROUP BY a.status")
+  List<Object[]> countApplicationsByStatus();
+
+  long countByIsQualifiedTrue();
+
+  long countByStatus(ApplicationStatus status);
+
+  List<Application> findJobOfferById(Long id);
 }

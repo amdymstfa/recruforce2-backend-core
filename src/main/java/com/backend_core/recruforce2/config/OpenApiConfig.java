@@ -14,17 +14,10 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-/**
- * OpenAPI / Swagger UI configuration.
- * <p>
- * Accessible at: http://localhost:8080/swagger-ui.html
- * <p>
- * Provides interactive API documentation with JWT authentication support.
- */
 @Configuration
 public class OpenApiConfig {
 
-  @Value("${spring.application.name}")
+  @Value("${spring.application.name:RecruForce2}")
   private String applicationName;
 
   @Bean
@@ -32,90 +25,55 @@ public class OpenApiConfig {
     return new OpenAPI()
       .info(apiInfo())
       .servers(apiServers())
-      .addSecurityItem(securityRequirement())
-      .components(securityComponents());
+      .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
+      .components(new Components()
+        .addSecuritySchemes("Bearer Authentication", createSecurityScheme()));
   }
 
-  /**
-   * API metadata — title, description, version, contact, license
-   */
   private Info apiInfo() {
     return new Info()
-      .title("RecruForce2 API")
+      .title("RecruForce2 - API Gateway & Core Service")
       .description(
-        "Intelligent recruitment platform API providing endpoints for:\n" +
-          "- User authentication (JWT)\n" +
-          "- Job offer management\n" +
-          "- Candidate profile management\n" +
-          "- Application tracking with AI matching scores\n" +
-          "- Interview scheduling and feedback\n" +
-          "- Notifications and alerts\n" +
-          "- AI-powered prediction module"
-      )
-      .version("1.0.0")
-      .contact(apiContact())
-      .license(apiLicense());
+        "### Système de Gestion de Recrutement Intelligent\n\n" +
+          "Cette API gère le cœur du système RecruForce2, incluant :\n" +
+          "- **Authentification sécurisée** via JWT.\n" +
+          "- **Gestion du pipeline** : Offres d'emploi, Candidatures, Entretiens.\n" +
+          "- **Module de Feedback** : Évaluation post-entretien par les recruteurs.\n" +
+          "- **Intégration IA** : Scoring de matching et prédictions de succès (via FastAPI AI Service).\n" +
+          "- **Administration** : Audit logs, statistiques dashboard et gestion des utilisateurs.")
+      .version("1.1.0")
+      .contact(new Contact()
+        .name("RecruForce2 Support")
+        .email("tech@recruforce2.com")
+        .url("https://recruforce2.com"))
+      .license(new License()
+        .name("Proprietary License")
+        .url("https://recruforce2.com/license"));
   }
 
-  /**
-   * Contact information
-   */
-  private Contact apiContact() {
-    return new Contact()
-      .name("RecruForce2 Team")
-      .email("support@recruforce2.com")
-      .url("https://recruforce2.com");
-  }
-
-  /**
-   * License information
-   */
-  private License apiLicense() {
-    return new License()
-      .name("Proprietary")
-      .url("https://recruforce2.com/license");
-  }
-
-  /**
-   * API server URLs (dev, prod)
-   */
   private List<Server> apiServers() {
     Server devServer = new Server()
       .url("http://localhost:8080")
-      .description("Development server");
+      .description("Serveur de Développement (Local)");
+
+    Server aiServer = new Server()
+      .url("http://localhost:8000")
+      .description("Service IA (FastAPI)");
 
     Server prodServer = new Server()
       .url("https://api.recruforce2.com")
-      .description("Production server");
+      .description("Serveur de Production");
 
-    return List.of(devServer, prodServer);
+    return List.of(devServer, aiServer, prodServer);
   }
 
-  /**
-   * Security requirement — all endpoints require JWT authentication
-   */
-  private SecurityRequirement securityRequirement() {
-    return new SecurityRequirement().addList("Bearer Authentication");
-  }
-
-  /**
-   * Security components — JWT Bearer token scheme
-   */
-  private Components securityComponents() {
-    return new Components()
-      .addSecuritySchemes("Bearer Authentication", securityScheme());
-  }
-
-  /**
-   * JWT Bearer token security scheme
-   */
-  private SecurityScheme securityScheme() {
+  private SecurityScheme createSecurityScheme() {
     return new SecurityScheme()
       .type(SecurityScheme.Type.HTTP)
       .scheme("bearer")
       .bearerFormat("JWT")
       .in(SecurityScheme.In.HEADER)
       .name("Authorization")
-      .description("Enter JWT token in the format: Bearer {token}");
+      .description("Collez votre token JWT ici (sans le préfixe 'Bearer ')");
   }
 }

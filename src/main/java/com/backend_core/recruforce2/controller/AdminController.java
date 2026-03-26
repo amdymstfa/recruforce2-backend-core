@@ -1,6 +1,8 @@
 package com.backend_core.recruforce2.controller;
 
+import com.backend_core.recruforce2.dto.response.DashboardStatsResponse;
 import com.backend_core.recruforce2.dto.response.UserResponse;
+import com.backend_core.recruforce2.service.DashboardService;
 import com.backend_core.recruforce2.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -20,6 +22,7 @@ import java.util.List;
 public class AdminController {
 
     private final UserService userService;
+  private final DashboardService dashboardService;
 
     @Operation(summary = "Get all system users")
     @GetMapping("/users")
@@ -35,4 +38,11 @@ public class AdminController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+  @Operation(summary = "Get global system statistics for dashboard")
+  @GetMapping("/dashboard/stats")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<DashboardStatsResponse> getDashboardStats() {
+    return ResponseEntity.ok(dashboardService.getGlobalStats());
+  }
 }

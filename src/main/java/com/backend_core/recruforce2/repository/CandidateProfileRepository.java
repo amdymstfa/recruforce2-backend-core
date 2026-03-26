@@ -46,4 +46,6 @@ public interface CandidateProfileRepository extends JpaRepository<Candidate, Lon
 
   /** Counts the total number of candidates */
   long count();
+
+  long countByParsedCvIdIsNotNull();
 }

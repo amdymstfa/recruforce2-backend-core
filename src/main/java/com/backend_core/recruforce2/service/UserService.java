@@ -42,7 +42,7 @@ public class UserService {
     @Transactional
     public void deleteUser(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        user.setIsActive(false); // Utilisation du setter généré par Lombok pour isActive
+        user.setIsActive(false);
         userRepository.save(user);
     }
 }

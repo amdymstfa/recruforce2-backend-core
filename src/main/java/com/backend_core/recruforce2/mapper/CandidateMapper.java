@@ -5,11 +5,12 @@ import com.backend_core.recruforce2.dto.request.CandidateProfileRequest;
 import com.backend_core.recruforce2.dto.response.CandidateProfileResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 /**
  * MapStruct mapper for Candidate entity ↔ DTOs conversion.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface CandidateMapper {
 
   /**

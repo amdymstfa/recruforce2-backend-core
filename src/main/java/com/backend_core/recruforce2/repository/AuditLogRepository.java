@@ -48,4 +48,6 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
 
   /** Counts audit log entries for a specific user */
   long countByUserId(Long userId);
+
+  List<AuditLog> findByUserIdOrderByTimestampDesc(Long userId);
 }

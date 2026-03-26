@@ -1,7 +1,6 @@
 package com.backend_core.recruforce2.controller;
 
 import com.backend_core.recruforce2.dto.response.NotificationResponse;
-import com.backend_core.recruforce2.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,12 +1,9 @@
 package com.backend_core.recruforce2.dto.response;
 
 import lombok.*;
-
+import java.util.List;
 import java.util.Map;
 
-/**
- * Response DTO for dashboard statistics.
- */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -40,13 +37,13 @@ public class DashboardStatsResponse {
   private Long upcomingInterviews;
   private Long completedInterviews;
 
-  // Application status breakdown
+  // Status breakdowns
   private Map<String, Long> applicationsByStatus;
-
-  // Interview status breakdown
   private Map<String, Long> interviewsByStatus;
 
-  // Average metrics
+  // Averages
   private Double averageMatchingScore;
   private Double averageFeedbackScore;
+
+  private List<ApplicationResponse> recentApplications;
 }

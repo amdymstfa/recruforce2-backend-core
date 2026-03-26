@@ -60,7 +60,7 @@ public class SecurityConfig {
 
         // 2. Endpoints réservés aux Admins
         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-        .requestMatchers("/api/users/**").hasRole("ADMIN")
+        .requestMatchers("/api/users/**").hasAnyRole("ADMIN", "RECRUITER", "MANAGER")
 
 
         .requestMatchers("/api/job-offers/**", "/api/applications/**").hasAnyRole("RECRUITER", "ADMIN")

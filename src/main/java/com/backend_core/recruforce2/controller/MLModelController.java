@@ -34,4 +34,17 @@ public class MLModelController {
   public ResponseEntity<List<MLModelResponse>> getAll() {
     return ResponseEntity.ok(mlModelService.getAllModels());
   }
+
+  @PatchMapping("/{id}/activate")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> activateModel(@PathVariable Long id) {
+    mlModelService.activate(id);
+    return ResponseEntity.ok().build();
+  }
+
+  @PostMapping("/retrain")
+  @PreAuthorize("hasRole('ADMIN')")
+  public ResponseEntity<Void> triggerRetraining() {
+    return ResponseEntity.accepted().build();
+  }
 }

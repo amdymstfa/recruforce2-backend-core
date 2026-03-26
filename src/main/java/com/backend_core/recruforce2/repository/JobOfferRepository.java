@@ -62,4 +62,6 @@ public interface JobOfferRepository extends JpaRepository<JobOffer, Long> {
 
   /** Checks if a LinkedIn job ID already exists */
   boolean existsByLinkedinJobId(String linkedinJobId);
+
+
 }

@@ -3,6 +3,7 @@ package com.backend_core.recruforce2.service;
 import com.backend_core.recruforce2.domain.entities.MLModel;
 import com.backend_core.recruforce2.dto.response.MLModelResponse;
 import com.backend_core.recruforce2.repository.MLModelRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,5 +48,13 @@ public class MLModelService {
       .isActive(model.getIsActive())
       .statistics(model.getStatistics())
       .build();
+  }
+
+  public void activate(Long id) {
+    MLModel model = mlModelRepository.findById(id)
+      .orElseThrow(() -> new EntityNotFoundException("Model not found"));
+
+    model.setIsActive(true);
+    mlModelRepository.save(model);
   }
 }
